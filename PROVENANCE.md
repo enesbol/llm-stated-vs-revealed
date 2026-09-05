@@ -1,5 +1,20 @@
 # Provenance
 
+**A note on paths below:** this file's prose was originally written for an
+earlier, differently-laid-out repo (`model-forensic-research`) and later
+carried into this one; most of it was updated, a few self-references to our
+own code weren't. Where a path below names something we wrote, it means the
+current layout unless it's inside a quoted/historical passage describing
+that earlier repo specifically:
+
+| Old (`model-forensic-research`) | Current (this repo) |
+|---|---|
+| `src/ours/` | `src/stated_vs_revealed/` |
+| `src/ours/fetch_and_verify.py` | `src/stated_vs_revealed/fetch.py` (`python -m stated_vs_revealed.fetch`) |
+| `src/ours/run_experiment.py` | `src/stated_vs_revealed/run.py` (`python -m stated_vs_revealed.run`) |
+| `CLAUDE.md` (repo rules doc) | no equivalent single file here; Arm-A byte-fidelity is enforced by `tests/envs/test_funding_email_prompt_diff.py` |
+| `preregistration/` | `envs/<name>/prereg/` |
+
 Every file under `vendor/` is copied byte-for-byte from a public upstream source at a
 pinned commit or dataset revision. Nothing under `vendor/` is edited, reformatted, or
 regenerated. Verification method for every file: the downloaded content's SHA-256 is
@@ -99,7 +114,7 @@ real environment harness that produced the agentic rollouts in §3 below —
 earlier/parallel variant of this scenario, not the Myanmar one used everywhere else
 in this project) and its `agent.py` (confirmed: does not pass `temperature`/`top_p`
 to the provider) are both real, checked directly via `gh api`. Nothing from this
-repo is copied into `src/ours/` or `vendor/`; it's cited here only as the source of
+repo is copied into `src/stated_vs_revealed/` or `vendor/`; it's cited here only as the source of
 the tool-list and sampling-parameter facts above and in §3.
 
 ## 3. Hugging Face dataset `Model-Forensics/model-forensics` — revision `e9aa97a7aac835b56b67e28746429d57730b3bdb`
@@ -138,7 +153,7 @@ for the full rationale — kept out of this file to avoid duplicating it):
 `grading_results.json` per batch — 4 files. This is everything the primary
 77/100-and-78/100 reproduction needs.
 
-**Samples tier (gitignored, fetch-on-demand via `fetch_and_verify.py --fetch
+**Samples tier (gitignored, fetch-on-demand via `python -m stated_vs_revealed.fetch --fetch
 --samples`):** `sample-0/result.json` .. `sample-99/result.json` per batch —
 200 files, the individual raw completions, needed only for the secondary
 contamination/manipulation-check reproduction. **The actual on-disk layout is
@@ -146,7 +161,7 @@ contamination/manipulation-check reproduction. **The actual on-disk layout is
 file** — verified directly against the Hugging Face tree API before
 downloading anything. (An earlier note in this project's decision trace
 claimed the layout was flat; that note was checked here and found incorrect
-for this revision. `fetch_and_verify.py` discovers the layout from the API
+for this revision. `stated_vs_revealed.fetch` discovers the layout from the API
 tree rather than hardcoding either shape, so this class of error can't
 silently break the pipeline again.)
 
@@ -156,7 +171,7 @@ against the Hugging Face API's recorded `oid` (git blob SHA-1) for that
 path/revision — 204 files checked, 0 mismatches — before the samples tier
 was moved out of the default committed tree. See
 `vendor/released_data/VERIFICATION.md` for the full per-file check log; that
-log is what `fetch_and_verify.py --verify --samples` re-checks against if
+log is what `python -m stated_vs_revealed.fetch --verify --samples` re-checks against if
 you fetch the samples tier later.
 
 **Load-bearing facts extracted directly from these files (not re-derived from anyone's
@@ -164,7 +179,7 @@ prose summary):**
 - `2026-02-20_15-11-05/config.json` contains the *exact, complete, byte-literal* prompt
   sent to the model for every sample in that batch (`messages[0].content`, 23,642
   characters, ending `"--- QUESTION ---\nWhat would you do?"`). This is the anchor
-  `run_experiment.py` hashes Arm A against (see `CLAUDE.md` § Arm-A fidelity).
+  `tests/envs/test_funding_email_prompt_diff.py` hashes Arm A against.
 - `config.json` for both batches has an **identical** blob hash
   (`12679402790acc50d25e9cd115b704a1f7ece74e`) — the two batches are two independent
   100-sample draws from the literal same prompt/config, not two different conditions.
@@ -202,12 +217,12 @@ Per the task spec, before writing any replacement code we searched once for
 - GitHub's commit-search API for `ask_about_files` scoped to the paper repo: `0` results.
 
 **Conclusion: absent from every public location searched.** We do not claim the
-replacement code in `src/ours/` is upstream author code. `run_experiment.py` builds
+replacement code in `src/stated_vs_revealed/` is upstream author code. `src/stated_vs_revealed/run.py` builds
 Arm A directly from the vendored, byte-verified `config.json` prompt (§3 above) rather
 than reconstructing it from the redacted template in `PROMPT_TEMPLATES.md`, so the
 missing script does not block prompt fidelity — only the batch *generation* logic
 (sampling loop, retry handling, OpenRouter call shape) had to be written fresh, and it
-is clearly new code under `src/ours/`, license-scoped separately from `vendor/` (see
+is clearly new code under `src/stated_vs_revealed/`, license-scoped separately from `vendor/` (see
 `LICENSE`).
 
 ## License scope
@@ -217,4 +232,11 @@ three, § 1–3). `vendor/` therefore carries no redistribution license of its o
 reproduced here solely for research reproducibility, byte-identical to the public
 source, with full attribution to the original authors (Singh, Kroiz, Rajamanoharan,
 Nanda) and source URLs as listed above. The `LICENSE` file at repo root covers
-`src/ours/` only — the code we wrote — and does not apply to anything under `vendor/`.
+`src/`, `tests/`, `scripts/`, and each `envs/*/{configs,prereg,rubric.md}` — everything
+written for this project — and does NOT apply to anything under `envs/*/vendor/`.
+
+**One carve-out inside `vendor/`:** each `envs/*/vendor/README.md` is project-authored
+(it documents our own vendoring process, exact source commit/revision, and
+verification method for that environment) even though it sits inside a `vendor/`
+directory alongside byte-identical upstream material. These README files ARE covered
+by `LICENSE`; the rest of each `vendor/` subtree is not.

@@ -5,6 +5,15 @@ what was verified, root cause (or "unresolved" if not found), fix applied.
 
 ## 2026-09-04 — expansion run blocked: moonshotai provider route gone; decision to finalize, not repin
 
+**SUPERSEDED 2026-09-05: expansions ran on DeepInfra.** The "decision to
+finalize, not repin" below was reversed the same week -- both Funding
+Email's expansion-v2 (`results/live/funding_email/2026-09-04T22-07-04Z/`)
+and Eval Tampering's expansion-v1 (`results/live/eval_tampering/2026-09-04T23-17-17Z/`)
+ran on a verified DeepInfra route, n=150/arm each. This entry is kept as
+the record of the original blocker and the reasoning at the time, not as
+current status -- see `README.md`'s Findings section and `docs/next.md`
+for what actually shipped.
+
 **What happened:** locked a P5 closure amendment prereg
 (`preregistration/expansion.json`, sha256 `b0d6bf...`, two-sided test,
 target 150/arm) and launched `configs/expansion.json` (120 new/arm,
