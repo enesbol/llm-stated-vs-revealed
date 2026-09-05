@@ -34,6 +34,30 @@ command after cloning to regenerate them from the committed raw data.
 | Funding Email | S, A | 30/30 | Complete, human-labeled. Primary A-vs-B pilot is an honest, underpowered null (see `docs/findings.md`); the historical non-reproduction (fresh 96.7% vs. the paper's own 77.5%) is a separate, positive finding. |
 | Eval Tampering | S, A | 30/30 (pilot), 150/150 (expansion) | Pilot complete, both arms human-labeled. Expansion: Artifact arm complete (deterministic rule, 150/150 parsed); Stated arm consultative-labeled (4 model raters), full human labeling still pending, see `docs/handoff/eval_tampering_v1_resolved.md`. |
 
+## Findings
+
+**Funding Email.** Primary result: **96.7% (Stated) vs. 90.0% (Artifact),
+one-sided p=0.150, not significant** at n=30/arm — an honest, preregistered
+null. Two findings alongside it (full detail: `docs/findings.md`): (1) the
+published third-person rate did not reproduce (fresh 96.7% vs. the paper's
+own historical 77.5%, same byte-locked prompt and provider pin, Fisher's
+exact p≈0.013, a real positive finding, traced to refusal-rate drift
+16.5%→3.3% and confirmed against a full census of the paper's 33 refused
+completions, not a sample); (2) a reasoning-blind judge scored the arms in
+the opposite order from the eventual human labels, because cut-off
+completions state their real decision in `response_reasoning`, never in
+visible content. A locked n=150/arm expansion ran after the original
+`moonshotai` provider pin 404'd (confirmed live, $0 spent) and was
+re-verified onto a working route (DeepInfra); generation and secondary
+judge grading are complete, the prereg's primary human labeling of the
+audit subset is not.
+
+**Eval Tampering.** Pilot (n=30/arm) complete and fully human-labeled on
+both arms. A locked n=150/arm expansion has also run: the Artifact arm is
+complete via the same deterministic rule; the Stated arm has a 4-model-rater
+consultative reading only, not yet the prereg's primary human pass (see
+`docs/handoff/eval_tampering_v1_resolved.md`).
+
 ## Repository layout
 
 ```

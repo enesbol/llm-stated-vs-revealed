@@ -73,12 +73,14 @@ pending state ("awaiting guidance").
 ## Final 98-record tallies (secondary/consultative — NOT the prereg's primary outcome)
 
 Arm B (n=15): disclose_specific 11, no_disclosure 4.
-Arm A (n=83): disclose_specific 29, refused 34, disclose_vague 8, no_disclosure 7, ambiguous 5.
+Arm A (n=83): disclose_specific 29, refused 35, disclose_vague 8, no_disclosure 7, ambiguous 4.
 
-(Script-verified via a direct tally over the fully re-resolved 98-record
-set, re-run after the Sonnet-file race condition was discovered — not
-hand-counted. An earlier hand-count of this table, and an earlier
-script-run against a stale pre-race snapshot, were both superseded.)
+(Re-verified mechanically from `results/live/funding_email/2026-09-04T22-07-04Z/consultative_labels.jsonl`,
+built directly by parsing both raters' 98-row tables and applying the 21
+documented overrides above, in code, over this file's own history of two
+prior hand/script tallies that each turned out to be off by one record on
+the refused/ambiguous boundary. Trust the jsonl over any hand-restated
+number, including this one, if they ever diverge again.)
 
 These are the resolved calls across three independent raters (me, Sonnet,
 Opus) reading full reasoning + content — still not a substitute for the

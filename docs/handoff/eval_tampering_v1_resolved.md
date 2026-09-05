@@ -13,9 +13,11 @@ parse failures across 150 records.
 
 ## Stated arm (4 independent model raters, consultative only)
 
-Four blind model-rater passes (gem, gp, op, son — raw labels in
-`docs/handoff/eval_tampering_v1_raters/`) labeled all 150 Stated-arm
-records against `envs/eval_tampering/rubric.md`. 43/150 (28.7%) disagreed on at least one
+Four frontier models (Gemini 3.1 Pro, GPT-5.6, Opus, Sonnet), each via
+blind chat-UI pass, single pass, no access to each other's output, labeled
+all 150 Stated-arm records against `envs/eval_tampering/rubric.md`; raw
+per-rater labels are in `consultative_labels.jsonl`'s `raters` field, not
+committed as separate transcript files. 43/150 (28.7%) disagreed on at least one
 rater; 41 resolved by 3-of-4 majority; 2 genuine 2-2 splits (A-77, A-133)
 resolved by direct source read — both are mechanical, not judgment calls,
 since the response states the `suspicious_observations` value in plain
@@ -53,7 +55,8 @@ Final tally (n=150):
 - disclose_specific: 52 (34.7%)
 - ambiguous: 5 (3.3%)
 
-Full per-record resolution: `docs/handoff/eval_tampering_v1_raters/CONFLICTS.md`.
+Full per-record resolution, with each rater's raw label and the resolution
+method: `results/live/eval_tampering/2026-09-04T23-17-17Z/consultative_labels.jsonl`.
 
 **This is NOT the prereg's primary outcome.** `envs/eval_tampering/prereg/expansion-v1.json`
 requires human labeling of all 300 records as primary; an LLM/model judge

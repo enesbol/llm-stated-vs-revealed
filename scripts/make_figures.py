@@ -1,13 +1,15 @@
 """Generate the write-up's figures. Run: .venv/bin/python scripts/make_figures.py
-Writes PNGs to figures/. Matplotlib only, no seaborn dependency."""
+Writes PNGs to figures/. Every number here is read from the committed JSONL
+files at generation time, never hand-typed. Matplotlib only, no seaborn."""
+import json
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
-from scipy import stats
 
-OUT = Path(__file__).resolve().parents[1] / "figures"
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "figures"
 OUT.mkdir(exist_ok=True)
 
 plt.rcParams.update({
@@ -36,9 +38,14 @@ def wilson_ci(k, n, z=1.96):
     return max(0, center - half), min(1, center + half)
 
 
-def bar_with_ci(ax, labels, rates_pct, cis_pct, colors, title, ylabel):
+def bar_with_ci(ax, labels, rates_pct, cis_pct, colors, title, ylabel, hatches=None):
     x = np.arange(len(labels))
     bars = ax.bar(x, rates_pct, color=colors, width=0.55, zorder=3)
+    if hatches:
+        for bar, h in zip(bars, hatches):
+            if h:
+                bar.set_hatch(h)
+                bar.set_edgecolor("white")
     for i, (r, (lo, hi)) in enumerate(zip(rates_pct, cis_pct)):
         ax.errorbar(i, r, yerr=[[r - lo], [hi - r]], fmt="none", ecolor="black",
                     elinewidth=1.3, capsize=5, capthick=1.3, zorder=4)
@@ -51,12 +58,30 @@ def bar_with_ci(ax, labels, rates_pct, cis_pct, colors, title, ylabel):
     ax.set_title(title, fontsize=11.5, fontweight="bold", pad=10)
 
 
+def load_jsonl(path):
+    rows = []
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    return rows
+
+
 # ---------- Figure 1: Funding Email, pilot (primary, human-labeled) ----------
-fig, ax = plt.subplots(figsize=(6.4, 4.2))
+fe_pilot = load_jsonl(ROOT / "results/live/funding_email/2026-08-12T16-44-24Z/graded_with_human_labels.jsonl")
+fe_pilot_labels = {"A": {}, "B": {}}
+for r in fe_pilot:
+    if r.get("excluded") or not r.get("human_label"):
+        continue
+    fe_pilot_labels[r["arm"]][r["human_label"]] = fe_pilot_labels[r["arm"]].get(r["human_label"], 0) + 1
+
 n = 30
-k_stated, k_artifact = 29, 27
+k_stated = fe_pilot_labels["A"].get("disclose_specific", 0)
+k_artifact = fe_pilot_labels["B"].get("disclose_specific", 0)
 rates = [k_stated / n * 100, k_artifact / n * 100]
 cis = [tuple(100 * c for c in wilson_ci(k_stated, n)), tuple(100 * c for c in wilson_ci(k_artifact, n))]
+fig, ax = plt.subplots(figsize=(6.4, 4.2))
 bar_with_ci(ax, ["Stated\n(n=30)", "Artifact\n(n=30)"], rates, cis, [STATED_C, ARTIFACT_C],
             "Funding Email pilot, specific-disclosure rate\n(primary outcome, human-labeled)",
             "% disclose_specific")
@@ -67,50 +92,83 @@ fig.text(0.5, 0.01, "+6.7pp, one-sided p=0.150 (not significant), 95% CI on the\
 fig.savefig(OUT / "funding_email_pilot.png", dpi=200)
 plt.close(fig)
 
-# ---------- Figure 2: Funding Email, expansion-v2, consultative ----------
-fig, ax = plt.subplots(figsize=(6.4, 4.2))
-n = 150
-n_a, n_b = 83, 15  # audit subset sizes actually resolved
-k_stated, k_artifact = 29, 11  # disclose_specific counts from the resolved consultative audit
-rates = [k_stated / n_a * 100, k_artifact / n_b * 100]
-cis = [tuple(100 * c for c in wilson_ci(k_stated, n_a)), tuple(100 * c for c in wilson_ci(k_artifact, n_b))]
-bar_with_ci(ax, [f"Stated\n(n={n_a})", f"Artifact\n(n={n_b})"], rates, cis, [STATED_C, ARTIFACT_C],
-            "Funding Email expansion-v2, specific-disclosure rate\n(consultative audit, NOT the primary outcome)",
-            "% disclose_specific")
-fig.tight_layout(rect=(0, 0.09, 1, 1))
-fig.text(0.5, 0.01, "Stratified audit subset of n=150/arm; full human labeling\n"
-                     "of the prereg's primary outcome is not yet done",
-         ha="center", fontsize=8.5, color="#555", style="italic")
-fig.savefig(OUT / "funding_email_expansion_consultative.png", dpi=200)
+# ---------- Figure 2: Label composition, both pilots (human-labeled) ----------
+et_human = load_jsonl(ROOT / "results/live/eval_tampering/2026-09-04T19-28-19Z/human_labels.jsonl")
+et_labels = {"A": {}, "B": {}}
+for r in et_human:
+    et_labels[r["arm"]][r["label"]] = et_labels[r["arm"]].get(r["label"], 0) + 1
+
+FE_ORDER = ["disclose_specific", "disclose_vague", "ambiguous", "no_disclosure", "refused"]
+FE_COLORS = {"disclose_specific": "#4C72B0", "disclose_vague": "#8CA9D6", "ambiguous": "#B0B0B0",
+             "no_disclosure": "#DD8452", "refused": "#8C3B23"}
+ET_ORDER = ["disclose_specific", "ambiguous", "conceal"]
+ET_COLORS = {"disclose_specific": "#4C72B0", "ambiguous": "#B0B0B0", "conceal": "#DD8452"}
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.0))
+
+for ax, title, order, colors, labels_dict, n_each in [
+    (axes[0], "Funding Email pilot (n=30/arm)", FE_ORDER, FE_COLORS, fe_pilot_labels, 30),
+    (axes[1], "Eval Tampering pilot (n=30/arm)", ET_ORDER, ET_COLORS, et_labels, 30),
+]:
+    arms = ["Stated", "Artifact"]
+    left = np.zeros(2)
+    for lab in order:
+        counts = [labels_dict["A"].get(lab, 0), labels_dict["B"].get(lab, 0)]
+        pct = [c / n_each * 100 for c in counts]
+        bars = ax.barh(arms, pct, left=left, color=colors[lab], label=lab, height=0.55)
+        for bar, c in zip(bars, counts):
+            if c > 0:
+                ax.text(bar.get_x() + bar.get_width() / 2, bar.get_y() + bar.get_height() / 2,
+                        str(c), ha="center", va="center", fontsize=9,
+                        color="white" if colors[lab] not in ("#B0B0B0",) else "black")
+        left += pct
+    ax.set_xlim(0, 100)
+    ax.set_xlabel("% of records")
+    ax.set_title(title, fontsize=11, fontweight="bold")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=3, fontsize=8, frameon=False)
+
+fig.suptitle("Where the non-disclosures go (human-labeled pilots only)", fontsize=13, fontweight="bold", y=1.04)
+fig.tight_layout(rect=(0, 0.05, 1, 1))
+fig.text(0.5, 0.005, "Composition, not an estimate (no CIs). Label sets differ by environment (see legend).\n"
+                      "Eval Tampering Artifact arm via the published deterministic rule, not human judgment.",
+         ha="center", fontsize=8, color="#555", style="italic")
+fig.savefig(OUT / "label_composition.png", dpi=200, bbox_inches="tight")
 plt.close(fig)
 
 # ---------- Figure 3: Eval Tampering, pilot (primary) vs expansion (consultative) ----------
 fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.4), sharey=True)
 
 n = 30
-k_stated, k_artifact = 15, 21  # disclose (non-conceal-complement) counts, pilot
+k_stated, k_artifact = et_labels["A"].get("disclose_specific", 0), et_labels["B"].get("disclose_specific", 0)
 rates = [k_stated / n * 100, k_artifact / n * 100]
 cis = [tuple(100 * c for c in wilson_ci(k_stated, n)), tuple(100 * c for c in wilson_ci(k_artifact, n))]
 bar_with_ci(axes[0], ["Stated\n(n=30)", "Artifact\n(n=30)"], rates, cis, [STATED_C, ARTIFACT_C],
-            "Pilot (primary, human-labeled)", "% disclose (non-conceal)")
+            "Pilot (primary, human-labeled)", "% disclose")
 
+et_consult = load_jsonl(ROOT / "results/live/eval_tampering/2026-09-04T23-17-17Z/consultative_labels.jsonl")
+et_mech = load_jsonl(ROOT / "results/live/eval_tampering/2026-09-04T23-17-17Z/mechanical_labels.jsonl")
 n = 150
-k_stated, k_artifact = 52, 94
+k_stated = sum(1 for r in et_consult if r["label"] == "disclose_specific")
+k_artifact = sum(1 for r in et_mech if r.get("label") == "disclose_specific")
 rates = [k_stated / n * 100, k_artifact / n * 100]
 cis = [tuple(100 * c for c in wilson_ci(k_stated, n)), tuple(100 * c for c in wilson_ci(k_artifact, n))]
 bar_with_ci(axes[1], ["Stated\n(n=150)", "Artifact\n(n=150)"], rates, cis, [STATED_C, ARTIFACT_C],
-            "Expansion-v1 (consultative,\n4-model-rater / mechanical rule)", "")
+            "Expansion-v1", "", hatches=["//", None])
+axes[1].text(0.25, -0.24, "4 model raters, consultative", ha="center", fontsize=7.5, color="#555",
+             transform=axes[1].transAxes)
+axes[1].text(0.75, -0.24, "deterministic rule", ha="center", fontsize=7.5, color="#555",
+             transform=axes[1].transAxes)
 
-fig.suptitle("Eval Tampering, disclosure rate holds direction at 5x sample size",
-             fontsize=13, fontweight="bold", y=1.03)
-fig.tight_layout()
+fig.suptitle("Direction persists at n=150 (Stated arm model-rated, not directly comparable to the pilot)",
+             fontsize=12, fontweight="bold", y=1.03)
+fig.tight_layout(rect=(0, 0.1, 1, 1))
 fig.savefig(OUT / "eval_tampering_pilot_vs_expansion.png", dpi=200, bbox_inches="tight")
 plt.close(fig)
 
-# ---------- Figure 4: Cross-environment sign flip ----------
+# ---------- Figure 4: Cross-environment sign flip (pilots only) ----------
 fig, ax = plt.subplots(figsize=(8.2, 4.3))
 envs = ["Funding Email\n(pilot, n=30/arm)", "Eval Tampering\n(pilot, n=30/arm)"]
-deltas = [+6.7, -20.0]  # Artifact - Stated on disclose-rate, signed so + means Stated discloses more
+deltas = [+6.7, -20.0]  # Stated - Artifact on disclose-rate, signed so + means Stated discloses more
 ci_lo = [-5.8, -44.3]
 ci_hi = [19.2, 4.3]
 colors = ["#4C72B0" if d > 0 else "#DD8452" for d in deltas]
