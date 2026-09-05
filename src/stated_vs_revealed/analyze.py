@@ -328,7 +328,7 @@ def _et_secondary(run_dir: Path, prereg: dict, positive_label: str) -> dict | No
     # one arm has a secondary reading of its own.
     primary_labels, _ = _et_primary_labels_by_arm(run_dir)
     counts: dict[str, tuple[int, int]] = {}
-    for arm in set(rows_by_arm) | set(primary_labels):
+    for arm in sorted(set(rows_by_arm) | set(primary_labels)):
         if arm in rows_by_arm:
             labels = [r["label"] for r in rows_by_arm[arm]]
         else:
