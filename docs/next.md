@@ -42,7 +42,10 @@ complete the env×arm table this covariate is meant to support. Not started.
 
 The Funding Email pilot's primary A-vs-B test is honestly underpowered at
 n=30/arm (95% CI on the difference spans both "no effect" and most of the
-published gap). A locked expansion prereg targeting n=150/arm exists in the
-working repo but is currently blocked by an infrastructure failure (the
-pinned provider route disappeared) — see `docs/findings.md`. Re-attempt once
-a provider route is confirmed stable, or find a different faithful pin.
+published gap). The locked expansion prereg targeting n=150/arm has been run:
+the original `moonshotai`-only provider pin 404'd at zero cost, was
+re-verified live, and re-launched on a confirmed route (DeepInfra); all 300
+calls completed cleanly. Generation and secondary judge grading are done.
+What's still open is the prereg's primary human labeling of the stratified
+98-record audit subset, see `docs/findings.md` and
+`docs/handoff/funding_email_v2_disputes_resolved.md`.

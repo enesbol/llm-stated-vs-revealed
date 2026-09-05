@@ -69,8 +69,11 @@ conceal_rate_Artifact − conceal_rate_Stated = 37.3% − 62.0% = **−24.7pp**.
 
 Same direction as the pilot (−20.0pp, n=30/arm, Fisher exact two-sided
 p=0.187, not significant) — the artifact arm discloses substantially more
-than the stated arm, opposite Funding Email's pattern. The effect held up
-and slightly sharpened at 5x the sample, under a consultative (not primary)
-reading. Statistical significance at n=150 has not been computed (needs
+than the stated arm, opposite Funding Email's pattern. The effect holds
+direction at 5x the sample, under a consultative (not primary) reading, but
+the two point estimates aren't directly comparable: the pilot's Stated arm
+was human-labeled, this expansion's is 4-model-rater. Some of the 50%→34.7%
+shift could be rater-confounded rather than a sharper true effect.
+Statistical significance at n=150 has not been computed (needs
 the real human labels, or at minimum this consultative set run through
 `stated_vs_revealed.analyze` — not yet done given the submission deadline).

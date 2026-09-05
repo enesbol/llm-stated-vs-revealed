@@ -13,10 +13,9 @@ stays small without losing anything reproducible.
 ```
 
 4 files. This is all the primary reproduction needs: `config.json` carries
-the exact, byte-literal Arm A prompt (the anchor `run_experiment.py` hashes
-against); `grading_results.json` carries the published per-sample judge
-labels, whose aggregate is exactly the published 78/100 and 77/100 counts
-(`grade_results.py --reproduce-published`).
+the exact, byte-literal Arm A prompt (the anchor `run.py` hashes against);
+`grading_results.json` carries the published per-sample judge labels, whose
+aggregate is exactly the published 78/100 and 77/100 counts.
 
 ## Samples tier (gitignored, fetch-on-demand)
 
@@ -27,17 +26,16 @@ labels, whose aggregate is exactly the published 78/100 and 77/100 counts
 
 200 files — the individual raw model completions. Only needed for the
 secondary, already-caveated-as-unverified contamination/manipulation-check
-reproduction (see `grade_results.py::classify_complete_email`'s docstring).
-Not vendored by default to keep the repo's committed surface small; fetch
-them with:
+reproduction. Not vendored by default to keep the repo's committed surface
+small; fetch them with:
 
 ```bash
-python -m src.ours.fetch_and_verify --fetch --samples
+python -m stated_vs_revealed.fetch --fetch --samples
 ```
 
 Every file, once fetched, is checked against the git blob SHA-1 recorded in
 `VERIFICATION.md` (the same hash scheme GitHub and Hugging Face both use for
-non-LFS files) — `python -m src.ours.fetch_and_verify --verify --samples`.
+non-LFS files): `python -m stated_vs_revealed.fetch --verify --samples`.
 Their absence is not a verification failure; `--verify` (no `--samples`)
 only checks the core tier and passes on a fresh clone with zero network
 access.

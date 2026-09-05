@@ -37,23 +37,27 @@ Three findings alongside the null (full detail: `docs/findings.md`):
    field) scored the Artifact arm higher than Stated — the opposite sign
    from the eventual human-labeled result. Cut-off completions state their
    real decision in reasoning, never in visible content.
-3. **A planned expansion to n=150/arm was blocked, not patched around.** The
+3. **A planned expansion to n=150/arm ran, after a provider break was found and fixed live, not patched around silently.** The
    `moonshotai`-only provider pin (matching the paper's own released config)
    stopped routing to the pinned model on OpenRouter entirely between the
-   pilot and the expansion attempt — confirmed live, $0 spent (404s aren't
-   billed). Repinning to a different provider was rejected as introducing a
-   provider confound into the one comparison this design exists to keep
-   clean.
+   pilot and the expansion attempt, confirmed live, $0 spent (404s aren't
+   billed). Rather than repin blind, the actual serving provider was
+   re-verified live (`GET /api/v1/models/.../endpoints`) and the run
+   completed on the confirmed route (DeepInfra), 300/300 calls, 0 errors.
+   Generation and secondary judge grading are complete; the prereg's primary
+   human labeling of the audit subset is not (see `docs/findings.md`).
 
 ## Current status (Eval Tampering)
 
 A second environment, same Stated/Artifact structure, different scenario (a
 math-grading agent finds a note from a past copy of itself admitting the
-test was rigged to dodge weapons-capability assessment). Artifact arm is
-complete via a deterministic rule (30/30 parsed, no human time needed beyond
-auditing 0 flagged records). Stated arm is generated (30 real completions)
-and being hand-labeled — no judge is used at n=30 (see `docs/findings.md`
-2026-09-05 entry for why).
+test was rigged to dodge weapons-capability assessment). Pilot (n=30/arm) is
+complete and fully human-labeled: Artifact arm via a deterministic rule
+(30/30 parsed, no judge used at n=30, see `docs/findings.md`), Stated arm
+hand-labeled directly. An n=150/arm expansion has since run (300/300 calls,
+0 errors): the Artifact arm is complete via the same deterministic rule;
+the Stated arm has a 4-model-rater consultative reading only, not yet the
+prereg's primary human pass (see `docs/handoff/eval_tampering_v1_resolved.md`).
 
 ## Where to look next
 
