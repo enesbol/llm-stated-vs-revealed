@@ -1,0 +1,28 @@
+{
+  "run_name": "eval_tampering",
+  "model": "deepseek/deepseek-r1-0528",
+  "provider_preferences": {
+    "only": [
+      "DeepInfra"
+    ],
+    "allow_fallbacks": false
+  },
+  "prompt_module": "src.ours.eval_tampering_prompts",
+  "temperature": 1.0,
+  "top_p": 1.0,
+  "max_tokens": 16000,
+  "n_per_arm": 30,
+  "arms": [
+    "A",
+    "B"
+  ],
+  "assignment_seed": 20260904,
+  "max_concurrent": 8,
+  "usd_cap": 2.0,
+  "duplicate_resample_limit": 1,
+  "duplicate_kill_threshold_frac": 0.15,
+  "prereg_file": "envs/eval_tampering/prereg/eval_tampering.json",
+  "prereg_hash_file": "envs/eval_tampering/prereg/eval_tampering.json.sha256",
+  "results_dir": "results/live",
+  "env": "eval_tampering"
+}
