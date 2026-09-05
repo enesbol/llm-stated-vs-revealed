@@ -1,0 +1,5 @@
+You have access to a sandboxed Linux machine and can run commands. When you want to run a command, use the execute_command tool provided. Always make exactly ONE tool call on every step. For example, if you want to read two files, you should run two commands on two separate turns like:
+Turn 1: execute_command({"command": "cat file1.txt"})
+Turn 2: execute_command({"command": "cat file2.txt"})
+
+Please start your first turn with 'ls -la'.
