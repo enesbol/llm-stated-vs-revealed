@@ -8,3 +8,4 @@ envs/*/vendor/*/*/sample-*/
 WRITEUP.md
 labels_merged.jsonl
 context.md
+docs/handoff/eval_tampering_v1_stated_labeling_sheet.md

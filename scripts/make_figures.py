@@ -192,6 +192,46 @@ fig.tight_layout()
 fig.savefig(OUT / "cross_environment_sign_flip.png", dpi=200)
 plt.close(fig)
 
+# ---------- Figure 5: judge-reversal, reasoning-blind judge vs human labels ----------
+fe_pre = load_jsonl(ROOT / "results/live/funding_email/2026-08-12T16-44-24Z/graded_pre_reasoning_fix.jsonl")
+judge_counts = {"A": [0, 0], "B": [0, 0]}  # [specific, gradeable_n]
+for r in fe_pre:
+    if r.get("excluded"):
+        continue
+    aj = r.get("agentic_judge")
+    if not aj or aj.get("disclosure_level") is None:
+        continue
+    judge_counts[r["arm"]][1] += 1
+    if aj["disclosure_level"] == "specific":
+        judge_counts[r["arm"]][0] += 1
+
+k_j_stated, n_j_stated = judge_counts["A"]
+k_j_artifact, n_j_artifact = judge_counts["B"]
+rates_judge = [k_j_stated / n_j_stated * 100, k_j_artifact / n_j_artifact * 100]
+cis_judge = [tuple(100 * c for c in wilson_ci(k_j_stated, n_j_stated)),
+             tuple(100 * c for c in wilson_ci(k_j_artifact, n_j_artifact))]
+
+rates_human = [k_stated_pilot := fe_pilot_labels["A"].get("disclose_specific", 0),
+               k_artifact_pilot := fe_pilot_labels["B"].get("disclose_specific", 0)]
+rates_human = [rates_human[0] / 30 * 100, rates_human[1] / 30 * 100]
+cis_human = [tuple(100 * c for c in wilson_ci(k_stated_pilot, 30)),
+             tuple(100 * c for c in wilson_ci(k_artifact_pilot, 30))]
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4.4), sharey=True)
+bar_with_ci(axes[0], [f"Stated\n(n={n_j_stated})", f"Artifact\n(n={n_j_artifact})"], rates_judge, cis_judge,
+            [STATED_C, ARTIFACT_C], "Reasoning-blind judge (pre-fix)\nagentic_judge.disclosure_level==specific",
+            "% specific disclosure")
+bar_with_ci(axes[1], ["Stated\n(n=30)", "Artifact\n(n=30)"], rates_human, cis_human,
+            [STATED_C, ARTIFACT_C], "Human labels (primary, post-fix)", "")
+fig.suptitle("A judge blind to reasoning gets the ranking backwards",
+             fontsize=12.5, fontweight="bold", y=1.03)
+fig.tight_layout()
+fig.text(0.5, -0.03, "Same 60 completions. Cut-off responses state their real decision in\n"
+                      "response_reasoning, never in visible content the pre-fix judge read.",
+         ha="center", fontsize=8.5, color="#555", style="italic")
+fig.savefig(OUT / "judge_reversal.png", dpi=200, bbox_inches="tight")
+plt.close(fig)
+
 print("Wrote figures to", OUT)
 for p in sorted(OUT.glob("*.png")):
     print(" -", p.name, f"{p.stat().st_size/1024:.0f}KB")

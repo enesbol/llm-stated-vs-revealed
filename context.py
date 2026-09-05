@@ -10,21 +10,38 @@ code block under its path.
 """
 from __future__ import annotations
 
+import fnmatch
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
-# Files that are real, necessary, and tracked, but add no value to a
-# read-through context dump (regenerable, or just noise: hash lists,
-# binary images, lockfiles). Extend this list rather than the code below.
+# This dump is for an LLM reading the codebase: source, tests, docs,
+# small configs. Not raw run data, not generated label sheets, not hash
+# manifests -- those are real and necessary to the project, just not
+# useful as *context* to read. Extend this list rather than the code below.
 EXCLUDE_PATHS = {
     "MANIFEST.sha256",
     "context.py",
 }
 EXCLUDE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".lock"}
 EXCLUDE_DIR_PARTS = {"__pycache__", ".git"}
+# Vendored upstream data blobs (released_data/config.json carries the full
+# anchor prompt text) are skipped by directory segment. results/live/ is
+# NOT excluded wholesale -- a reviewer needs the small per-run label files
+# (human_labels.jsonl, mechanical_labels.jsonl, consultative_labels.jsonl,
+# config_used.json, duplicate_report.md, spend_ledger.json) to verify
+# numbers. Only the raw-transcript files are excluded, by filename, below.
+EXCLUDE_DIR_SEGMENTS = {"released_data"}
+# Raw per-run generation/grading blobs: full request/response transcripts
+# (manifest.jsonl, graded*.jsonl) or raw judge output (judge_labels.jsonl).
+# Matched by filename anywhere in the tree, not just under results/live/.
+EXCLUDE_FILENAME_GLOBS = {"manifest.jsonl", "graded*.jsonl", "judge_labels.jsonl"}
+# A file this long is a generated artifact (a labeling sheet, a big JSON
+# dump), not something to read line by line -- skip it with a note instead
+# of silently blowing up the dump again like the 50k-line labeling sheet did.
+MAX_LINES = 2000
 
 LANG_BY_SUFFIX = {
     ".py": "python",
@@ -52,6 +69,10 @@ def tracked_files() -> list[Path]:
             continue
         if EXCLUDE_DIR_PARTS & set(rel.parts):
             continue
+        if EXCLUDE_DIR_SEGMENTS & set(rel.parts):
+            continue
+        if any(fnmatch.fnmatch(p.name, pat) for pat in EXCLUDE_FILENAME_GLOBS):
+            continue
         kept.append(p)
     return sorted(kept)
 
@@ -70,6 +91,11 @@ def render(paths: list[Path]) -> str:
             text = p.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             lines.append(f"*(binary or non-UTF-8 file, {p.stat().st_size} bytes, skipped)*")
+            lines.append("")
+            continue
+        n_lines = text.count("\n") + 1
+        if n_lines > MAX_LINES:
+            lines.append(f"*({n_lines} lines, over the {MAX_LINES}-line context cap, skipped)*")
             lines.append("")
             continue
         fence = "````" if "```" in text else "```"

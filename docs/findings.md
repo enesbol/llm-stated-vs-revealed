@@ -664,3 +664,26 @@ claim ("A-6 is the only clean flip," "these six are collapses") can be individua
 correct while its membership list is still wrong — verify list membership by script
 or direct read before using either the number or the specific record IDs in the
 write-up.
+
+## 2026-09-05 — judge-reversal figure skipped on a mismatched-instrument lookup, then correctly rebuilt
+
+**What happened:** an earlier pass looked up "Stated 20/29=69%" (the judge-reversal
+finding already stated correctly in prose in `WRITEUP.md`'s exec summary) by
+computing `third_person_judge.stated_action=="disclose_specific"` on Arm A vs
+`agentic_judge` on Arm B — a mismatched-judge-per-arm bug, the exact failure mode
+already documented above under the "one shared instrument" rule. That gave
+27/30=90% for Arm A, didn't match, and the figure was skipped rather than shipped
+wrong — correct call given the mismatch, but the mismatch itself should have been
+caught before concluding the underlying claim was unverifiable.
+
+**Fix:** recomputed using the actually-intended single instrument, `agentic_judge`
+on both arms, `disclosure_level=="specific"`, gradeable-only denominator, from
+`results/live/funding_email/2026-08-12T16-44-24Z/graded_pre_reasoning_fix.jsonl`:
+Stated 20/29=69.0%, Artifact 25/28=89.3% — matches the number already in the
+write-up exactly. Built `figures/judge_reversal.png` (two-panel: pre-fix agentic
+judge vs. post-fix human labels, same 60 completions) and wired it in as Fig. 4.
+
+**Rule going forward:** when a computed number doesn't match an existing claim,
+check which judge/label pair the claim actually refers to before treating the
+mismatch as evidence the claim is wrong — a wrong lookup and a wrong claim produce
+the same symptom (numbers don't match) and need different fixes.
