@@ -97,10 +97,16 @@ shared and untouched by a new environment.
 ## Reproducing the numbers
 
 ```bash
-pip install -e .
+pip install -e ".[dev]"
 python -m stated_vs_revealed.reproduce
 git diff --exit-code results/summary.json   # should be empty on a clean checkout
 ```
+
+One command installs everything needed, including `pytest` (which
+`reproduce` runs first) and `matplotlib` (needed only by
+`scripts/make_figures.py`, not by `reproduce` itself). Nothing after that
+touches the network -- every number above is computed from the committed
+`results/live/` label files and preregs already in the repo.
 
 ## Provenance
 
