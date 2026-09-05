@@ -76,6 +76,13 @@ def write_summary(summary: dict) -> None:
                 lines.append(f"- diff = {t['diff_pp']:.1f}pp, p_value_primary = {t['p_value_primary']:.3f} ({t['primary_hypothesis_direction']})")
             elif run.get("note"):
                 lines.append(f"- {run['note']}")
+            if run.get("secondary"):
+                sec = run["secondary"]
+                lines.append(f"- secondary ({', '.join(sec['instrument'])}, never primary): " + ", ".join(
+                    f"{arm} {s}/{n} ({s/n*100:.1f}%)" for arm, (s, n) in sec.get("counts", {}).items()
+                ))
+                if "diff_pp" in sec:
+                    lines.append(f"  diff = {sec['diff_pp']:.1f}pp, p_two_sided = {sec['p_value_two_sided']:.3f}")
         lines.append("")
     (REPO_ROOT / "results" / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 

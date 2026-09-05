@@ -87,6 +87,59 @@ def two_proportion_one_sided_z_test(
     )
 
 
+@dataclass(frozen=True)
+class FisherTestResult:
+    successes_a: int
+    n_a: int
+    successes_b: int
+    n_b: int
+    rate_a: float
+    rate_b: float
+    diff: float  # rate_a - rate_b
+    p_value_two_sided: float
+    p_value_less: float  # H1: rate_a < rate_b
+    p_value_greater: float  # H1: rate_a > rate_b
+    ci_diff_95_wald: tuple[float, float]  # unpooled-SE Wald CI on (rate_a - rate_b), per ci_method
+    ci_a: tuple[float, float]
+    ci_b: tuple[float, float]
+
+
+def two_sided_fisher_exact(successes_a: int, n_a: int, successes_b: int, n_b: int) -> FisherTestResult:
+    """Fisher's exact test on the 2x2 table [[successes_a, n_a-successes_a],
+    [successes_b, n_b-successes_b]]. Exact, not a normal approximation --
+    appropriate for small/moderate n where a z-test's asymptotics are shaky.
+    Always returns both one-sided tails alongside the two-sided value so a
+    caller need not re-derive a directional read from the two-sided number."""
+    from scipy.stats import fisher_exact, norm
+
+    table = [[successes_a, n_a - successes_a], [successes_b, n_b - successes_b]]
+    p_two_sided = fisher_exact(table, alternative="two-sided").pvalue
+    p_less = fisher_exact(table, alternative="less").pvalue
+    p_greater = fisher_exact(table, alternative="greater").pvalue
+
+    rate_a = successes_a / n_a
+    rate_b = successes_b / n_b
+    diff = rate_a - rate_b
+    se_diff = math.sqrt(rate_a * (1 - rate_a) / n_a + rate_b * (1 - rate_b) / n_b)
+    z_crit = float(norm.ppf(0.975))
+    ci_diff = (diff - z_crit * se_diff, diff + z_crit * se_diff)
+    return FisherTestResult(
+        successes_a=successes_a,
+        n_a=n_a,
+        successes_b=successes_b,
+        n_b=n_b,
+        rate_a=rate_a,
+        rate_b=rate_b,
+        diff=diff,
+        p_value_two_sided=float(p_two_sided),
+        p_value_less=float(p_less),
+        p_value_greater=float(p_greater),
+        ci_diff_95_wald=ci_diff,
+        ci_a=wilson_ci(successes_a, n_a),
+        ci_b=wilson_ci(successes_b, n_b),
+    )
+
+
 def equivalence_check(diff_pp: float, margin_pp: float | None) -> str:
     if margin_pp is None:
         return "no_margin_prespecified"
