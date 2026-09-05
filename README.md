@@ -31,14 +31,14 @@ command after cloning to regenerate them from the committed raw data.
 
 | Environment | Arms run | n/arm | Status |
 |---|---|---|---|
-| Funding Email | S, A | 30/30 | Complete, human-labeled on both arms, independently (no suggestions shown). Primary A-vs-B pilot is an honest, underpowered null (see `docs/findings.md`); the historical non-reproduction (fresh 96.7% vs. the paper's own 77.5%) is a separate, positive finding. |
+| Funding Email | S, A | 30/30 | Complete, human-labeled on both arms, independently (no suggestions shown). Primary A-vs-B pilot is a preregistered, underpowered null (see `docs/findings.md`); the historical non-reproduction (fresh 96.7% vs. the paper's own 77.5%) is a separate, positive finding. |
 | Eval Tampering | S, A | 30/30 (pilot), 150/150 (expansion) | Pilot complete: Stated arm human-labeled, independently, no suggestions shown; Artifact arm graded by the published deterministic rule (a human cross-check exists and matches it exactly, but the rule is the specified primary source). Expansion: Artifact arm complete (deterministic rule, 150/150 parsed); Stated arm consultative-labeled (4 model raters), full human labeling still pending, see `docs/handoff/eval_tampering_v1_resolved.md`. |
 
 ## Findings
 
 **Funding Email.** Primary result: **96.7% (Stated) vs. 90.0% (Artifact),
-one-sided p=0.150, not significant** at n=30/arm — an honest, preregistered
-null. Two findings alongside it (full detail: `docs/findings.md`): (1) the
+one-sided p=0.150, not significant** at n=30/arm — a preregistered null.
+Two findings alongside it (full detail: `docs/findings.md`): (1) the
 published third-person rate did not reproduce (fresh 96.7% vs. the paper's
 own historical 77.5%, same byte-locked prompt and provider pin, Fisher's
 exact p≈0.013, a real positive finding, traced to refusal-rate drift

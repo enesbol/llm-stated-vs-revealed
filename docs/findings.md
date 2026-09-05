@@ -73,7 +73,7 @@ pin — two-sided p≈0.02. That's a positive, reportable finding (historical
 non-reproduction), not a second null, and should be written up as such
 rather than folded into "everything here is inconclusive."
 
-**Remaining real findings for the write-up, none of them nothing:**
+**Remaining findings worth writing up:**
 1. Historical non-reproduction of the published third-person rate,
    same-provider, same-prompt (p≈0.02).
 2. Judge-reversal exhibit: reasoning-blind judge showed B(89%) > A(69%);
@@ -269,8 +269,9 @@ agreement with human labels at n=10 for Luna (`reasoning_effort: minimal`);
 100% for gemini-3.8-flash on the 4-case subset below. No further testing
 needed here — this judge role is easy (short, single decisive narrative).
 
-**Agentic judge: neither cheap candidate is a safe swap — real finding,
-not a config problem.** Isolated the 4 disagreement cases from an initial
+**Agentic judge: neither cheap candidate is a safe swap.** This is a
+capability gap on the 4 disagreement cases below, not a config problem.
+Isolated the 4 disagreement cases from an initial
 n=10 Luna run (A-5, A-6, A-20, A-28 — all human-labeled `specific`) and
 tested every candidate against all 4:
 
