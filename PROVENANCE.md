@@ -232,8 +232,9 @@ three, § 1–3). `vendor/` therefore carries no redistribution license of its o
 reproduced here solely for research reproducibility, byte-identical to the public
 source, with full attribution to the original authors (Singh, Kroiz, Rajamanoharan,
 Nanda) and source URLs as listed above. The `LICENSE` file at repo root covers
-`src/`, `tests/`, `scripts/`, and each `envs/*/{configs,prereg,rubric.md}` — everything
-written for this project — and does NOT apply to anything under `envs/*/vendor/`.
+`src/`, `tests/`, `scripts/`, `docs/`, `results/`, and each
+`envs/*/{configs,prereg,rubric.md}` — everything written for this project —
+and does NOT apply to anything under `envs/*/vendor/`.
 
 **One carve-out inside `vendor/`:** each `envs/*/vendor/README.md` is project-authored
 (it documents our own vendoring process, exact source commit/revision, and

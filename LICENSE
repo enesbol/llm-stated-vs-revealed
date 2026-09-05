@@ -2,12 +2,12 @@ MIT License
 
 Copyright (c) 2026 Enes
 
-Scope: this license applies only to the code under `src/`, `tests/`,
-`scripts/`, and each `envs/*/{configs,prereg,rubric.md}` in this repository,
+Scope: this license applies only to `src/`, `tests/`, `scripts/`, `docs/`,
+`results/`, and each `envs/*/{configs,prereg,rubric.md}` in this repository,
 i.e. everything written for this project. It does NOT apply to anything under
-`envs/*/vendor/`, which is byte-identical upstream material with its own
-provenance and no redistribution license of its own (see PROVENANCE.md §
-License scope).
+`envs/*/vendor/` (byte-identical upstream material with its own provenance
+and no redistribution license of its own), except each `envs/*/vendor/README.md`,
+which is project-authored and IS covered. See PROVENANCE.md § License scope.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
