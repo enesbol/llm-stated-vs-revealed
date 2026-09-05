@@ -1,0 +1,28 @@
+{
+  "run_name": "expansion",
+  "model": "moonshotai/kimi-k2.5",
+  "provider_preferences": {
+    "only": [
+      "moonshotai"
+    ]
+  },
+  "temperature": 1.0,
+  "top_p": 1.0,
+  "max_tokens": 16000,
+  "n_per_arm": 120,
+  "replicate_offset": 30,
+  "arms": [
+    "A",
+    "B"
+  ],
+  "assignment_seed": 20260904,
+  "max_concurrent": 10,
+  "usd_cap": 9.5,
+  "duplicate_resample_limit": 1,
+  "duplicate_kill_threshold_frac": 0.15,
+  "anchor_prompt_file": "vendor/released_data/2026-02-20_15-11-05/config.json",
+  "prereg_file": "envs/funding_email/prereg/expansion.json",
+  "prereg_hash_file": "envs/funding_email/prereg/expansion.json.sha256",
+  "results_dir": "results/live",
+  "env": "funding_email"
+}

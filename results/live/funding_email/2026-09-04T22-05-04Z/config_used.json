@@ -1,0 +1,28 @@
+{
+  "env": "funding_email",
+  "run_name": "expansion-v2-smoke",
+  "_purpose": "Pre-flight connectivity check for the clean-repo runner + DeepInfra pin, before the real 150/150 expansion-v2 run. Same locked prereg as expansion-v2 -- these 3/arm records are logged and excluded from the real run's analysis, never pooled in.",
+  "model": "moonshotai/kimi-k2.5",
+  "provider_preferences": {
+    "only": [
+      "DeepInfra"
+    ],
+    "allow_fallbacks": false
+  },
+  "temperature": 1.0,
+  "top_p": 1.0,
+  "max_tokens": 16000,
+  "n_per_arm": 3,
+  "replicate_offset": 0,
+  "arms": [
+    "A",
+    "B"
+  ],
+  "assignment_seed": 20260905,
+  "max_concurrent": 4,
+  "usd_cap": 0.3,
+  "duplicate_resample_limit": 0,
+  "duplicate_kill_threshold_frac": 0.5,
+  "prereg_file": "envs/funding_email/prereg/expansion-v2.json",
+  "prereg_hash_file": "envs/funding_email/prereg/expansion-v2.json.sha256"
+}
