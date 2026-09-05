@@ -13,6 +13,7 @@ logic there.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -30,6 +31,20 @@ def _prereg_path_for_run(env_name: str, run_dir: Path) -> Path:
 
 
 def run_tests() -> bool:
+    """True means "proceed to regenerate the summary" -- either the tests
+    actually passed, or pytest isn't installed at all (`pip install -e .`
+    without the `[dev]` extra). The second case is loudly warned about, not
+    silently treated as a red suite: a missing test runner and a failing
+    test suite are different problems with different fixes, and collapsing
+    them into one "Tests failed" message sends someone to debug tests that
+    never ran."""
+    if importlib.util.find_spec("pytest") is None:
+        print(
+            "WARNING: pytest is not installed -- skipping the test suite. "
+            'Install it with `pip install -e ".[dev]"` to run tests before '
+            "trusting a regenerated summary."
+        )
+        return True
     result = subprocess.run([sys.executable, "-m", "pytest", "tests/", "-q"], cwd=REPO_ROOT)
     return result.returncode == 0
 
@@ -46,12 +61,18 @@ def regenerate_summary() -> dict:
                 continue
             prereg_path = _prereg_path_for_run(env_name, run_dir)
             if not prereg_path.exists():
-                continue
-            prereg = json.loads(prereg_path.read_text(encoding="utf-8"))
-            try:
-                result = analyze(env_name, run_dir, prereg)
-            except Exception as e:  # noqa: BLE001 - a failed run dir is data, not a crash
-                result = {"error": f"{type(e).__name__}: {e}"}
+                # A missing prereg is a real problem with this run directory
+                # (its config_used.json points at a file that isn't there),
+                # not something to silently drop from the summary -- record
+                # it as an error so main() can fail loudly on it, same as
+                # any other analysis exception.
+                result = {"error": f"FileNotFoundError: prereg_file {prereg_path} does not exist"}
+            else:
+                prereg = json.loads(prereg_path.read_text(encoding="utf-8"))
+                try:
+                    result = analyze(env_name, run_dir, prereg)
+                except Exception as e:  # noqa: BLE001 - a failed run dir is data, not a crash
+                    result = {"error": f"{type(e).__name__}: {e}"}
             run_results.append({"run": run_dir.name, **result})
         summary[env_name] = run_results
     return summary
@@ -96,6 +117,18 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps(summary, indent=2, default=str))
     print("\nWrote results/summary.json and results/summary.md.")
     print("Verify with: git diff --exit-code results/summary.json")
+
+    errors = [
+        f"{env_name}/{run['run']}: {run['error']}"
+        for env_name, runs in summary.items()
+        for run in runs
+        if run.get("error")
+    ]
+    if errors:
+        print(f"\n{len(errors)} run(s) failed to analyze -- summary.json/md still written, but this is not a clean reproduce:")
+        for e in errors:
+            print(f"  - {e}")
+        return 1
     return 0
 
 

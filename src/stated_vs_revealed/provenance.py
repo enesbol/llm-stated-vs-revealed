@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import subprocess
 import sys
 from pathlib import Path
 
@@ -27,7 +28,19 @@ def _sha256_file(path: Path) -> str:
 
 
 def vendored_files(root: Path = REPO_ROOT) -> list[Path]:
-    return sorted((root / "envs").glob("*/vendor/**/*"))
+    """Git-tracked files only, via `git ls-files` -- never a disk glob.
+    A glob over envs/*/vendor/**/* previously picked up 200 untracked,
+    gitignored sample-*/result.json files that happened to be sitting on
+    disk locally (fetched for convenience, never committed), breaking
+    verification on any fresh clone that lacks them. `git ls-files` reflects
+    exactly what's committed, which is the only thing MANIFEST.sha256 can
+    ever promise to verify."""
+    out = subprocess.run(
+        ["git", "ls-files", "envs/"], cwd=root, capture_output=True, text=True, check=True
+    ).stdout
+    return sorted(
+        root / line for line in out.splitlines() if line.strip() and "/vendor/" in line
+    )
 
 
 def generate(root: Path = REPO_ROOT) -> None:
