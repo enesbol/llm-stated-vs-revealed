@@ -32,7 +32,7 @@ command after cloning to regenerate them from the committed raw data.
 | Environment | Arms run | n/arm | Status |
 |---|---|---|---|
 | Funding Email | S, A | 30/30 | Complete — human-labeled. Primary A-vs-B pilot is an honest, underpowered null (see `docs/findings.md`); the historical non-reproduction (fresh 96.7% vs. the paper's own 77.5%) is a separate, positive finding. |
-| Eval Tampering | S, A | 30/30 | Artifact arm complete (deterministic rule, 30/30 parsed). Stated arm: generated, hand-labeling in progress. |
+| Eval Tampering | S, A | 30/30 (pilot), 150/150 (expansion) | Pilot complete, both arms human-labeled. Expansion: Artifact arm complete (deterministic rule, 150/150 parsed); Stated arm consultative-labeled (4 model raters), full human labeling still pending — see `docs/handoff/eval_tampering_v1_resolved.md`. |
 
 ## Repository layout
 
