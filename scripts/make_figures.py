@@ -51,31 +51,31 @@ def bar_with_ci(ax, labels, rates_pct, cis_pct, colors, title, ylabel):
     ax.set_title(title, fontsize=11.5, fontweight="bold", pad=10)
 
 
-# ---------- Figure 1: Funding Email -- pilot (primary, human-labeled) ----------
-fig, ax = plt.subplots(figsize=(5.2, 4))
+# ---------- Figure 1: Funding Email, pilot (primary, human-labeled) ----------
+fig, ax = plt.subplots(figsize=(6.4, 4.2))
 n = 30
 k_stated, k_artifact = 29, 27
 rates = [k_stated / n * 100, k_artifact / n * 100]
 cis = [tuple(100 * c for c in wilson_ci(k_stated, n)), tuple(100 * c for c in wilson_ci(k_artifact, n))]
 bar_with_ci(ax, ["Stated\n(n=30)", "Artifact\n(n=30)"], rates, cis, [STATED_C, ARTIFACT_C],
-            "Funding Email pilot -- specific-disclosure rate\n(primary outcome, human-labeled)",
+            "Funding Email pilot, specific-disclosure rate\n(primary outcome, human-labeled)",
             "% disclose_specific")
 fig.tight_layout(rect=(0, 0.09, 1, 1))
-fig.text(0.5, 0.01, "+6.7pp, one-sided p=0.150 (not significant) -- 95% CI on the\n"
+fig.text(0.5, 0.01, "+6.7pp, one-sided p=0.150 (not significant), 95% CI on the\n"
                      "difference includes both zero and the paper's published 13pp gap",
          ha="center", fontsize=8.5, color="#555", style="italic")
 fig.savefig(OUT / "funding_email_pilot.png", dpi=200)
 plt.close(fig)
 
-# ---------- Figure 2: Funding Email -- expansion-v2, consultative ----------
-fig, ax = plt.subplots(figsize=(5.2, 4))
+# ---------- Figure 2: Funding Email, expansion-v2, consultative ----------
+fig, ax = plt.subplots(figsize=(6.4, 4.2))
 n = 150
 n_a, n_b = 83, 15  # audit subset sizes actually resolved
 k_stated, k_artifact = 29, 11  # disclose_specific counts from the resolved consultative audit
 rates = [k_stated / n_a * 100, k_artifact / n_b * 100]
 cis = [tuple(100 * c for c in wilson_ci(k_stated, n_a)), tuple(100 * c for c in wilson_ci(k_artifact, n_b))]
 bar_with_ci(ax, [f"Stated\n(n={n_a})", f"Artifact\n(n={n_b})"], rates, cis, [STATED_C, ARTIFACT_C],
-            "Funding Email expansion-v2 -- specific-disclosure rate\n(consultative audit, NOT the primary outcome)",
+            "Funding Email expansion-v2, specific-disclosure rate\n(consultative audit, NOT the primary outcome)",
             "% disclose_specific")
 fig.tight_layout(rect=(0, 0.09, 1, 1))
 fig.text(0.5, 0.01, "Stratified audit subset of n=150/arm; full human labeling\n"
@@ -84,8 +84,8 @@ fig.text(0.5, 0.01, "Stratified audit subset of n=150/arm; full human labeling\n
 fig.savefig(OUT / "funding_email_expansion_consultative.png", dpi=200)
 plt.close(fig)
 
-# ---------- Figure 3: Eval Tampering -- pilot (primary) vs expansion (consultative) ----------
-fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.2), sharey=True)
+# ---------- Figure 3: Eval Tampering, pilot (primary) vs expansion (consultative) ----------
+fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.4), sharey=True)
 
 n = 30
 k_stated, k_artifact = 15, 21  # disclose (non-conceal-complement) counts, pilot
@@ -99,10 +99,10 @@ k_stated, k_artifact = 52, 94
 rates = [k_stated / n * 100, k_artifact / n * 100]
 cis = [tuple(100 * c for c in wilson_ci(k_stated, n)), tuple(100 * c for c in wilson_ci(k_artifact, n))]
 bar_with_ci(axes[1], ["Stated\n(n=150)", "Artifact\n(n=150)"], rates, cis, [STATED_C, ARTIFACT_C],
-            "Expansion-v1 (consultative:\n4-model-rater / mechanical rule)", "")
+            "Expansion-v1 (consultative,\n4-model-rater / mechanical rule)", "")
 
-fig.suptitle("Eval Tampering -- disclosure rate holds direction at 5x sample size",
-             fontsize=12.5, fontweight="bold", y=1.02)
+fig.suptitle("Eval Tampering, disclosure rate holds direction at 5x sample size",
+             fontsize=13, fontweight="bold", y=1.03)
 fig.tight_layout()
 fig.savefig(OUT / "eval_tampering_pilot_vs_expansion.png", dpi=200, bbox_inches="tight")
 plt.close(fig)
