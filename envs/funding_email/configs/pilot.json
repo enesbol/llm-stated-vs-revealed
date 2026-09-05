@@ -1,0 +1,25 @@
+{
+  "env": "funding_email",
+  "run_name": "pilot",
+  "model": "moonshotai/kimi-k2.5",
+  "provider_preferences": {
+    "only": [
+      "moonshotai"
+    ]
+  },
+  "temperature": 1.0,
+  "top_p": 1.0,
+  "max_tokens": 16000,
+  "n_per_arm": 30,
+  "arms": [
+    "A",
+    "B"
+  ],
+  "assignment_seed": 20260812,
+  "max_concurrent": 10,
+  "usd_cap": 5.0,
+  "duplicate_resample_limit": 1,
+  "duplicate_kill_threshold_frac": 0.15,
+  "prereg_file": "envs/funding_email/prereg/pilot.json",
+  "prereg_hash_file": "envs/funding_email/prereg/pilot.json.sha256"
+}

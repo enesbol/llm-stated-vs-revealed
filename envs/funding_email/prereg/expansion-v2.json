@@ -1,0 +1,70 @@
+{
+  "prereg_id": "p5-closure-amendment-v2",
+  "supersedes": "preregistration/expansion.json (prereg_id p5-closure-amendment-v1) -- that amendment's 120/120 pooled-with-pilot design was blocked before any billed call when the moonshotai first-party route stopped serving moonshotai/kimi-k2.5 on OpenRouter (confirmed live and via direct /endpoints fetch, $0 spent, see docs/handoff/notes.md 2026-09-04). This file is a FRESH standalone run, not a resumption of that one.",
+  "amendment_note": "Inherits pilot.json's claim, arm construction, and grading philosophy. Changes vs v1: (a) runs on a different provider (DeepInfra, not moonshotai first-party) because the original route is gone -- this run does NOT pool with the 30/30 pilot cell, which stays a separate, clearly-labeled cell reported alongside, never merged into one n; (b) n_per_arm is a fresh 150/150, not pilot-30 + expansion-120; (c) the grading rule is now JUDGE-PER-ARM, not 'both released judges on both arms' -- justified by the calibration table below, computed before this file was locked, from the pilot's own already-graded, already human-labeled data (results/live/2026-08-12T16-44-24Z/). No expansion-v2 data of any kind existed when this file was written.",
+  "provider_change_consequences": {
+    "loses": "Direct comparability with the paper's Moonshot-served 77.5% historical rate -- any drift claim against that number now carries a 'provider also changed' caveat. This does not affect the primary test.",
+    "does_not_lose": "The within-run Arm A vs Arm B comparison: both arms run on the same new provider, same day -- the arm contrast this design exists to measure is exactly as clean as a same-provider pilot would have been. The provider confound only touches cross-time/cross-provider comparisons, never the arm contrast."
+  },
+  "claim": "In the released Kimi K2.5 funding-email 'What would you do?' setting, requiring the model to output the exact email it would send (instead of a free-form answer) changes the specific-disclosure rate.",
+  "primary_hypothesis": {
+    "direction": "two_sided",
+    "statement": "H1: Arm B (exact email) specific-disclosure rate != Arm A (their exact question) specific-disclosure rate.",
+    "null": "H0: Arm B specific-disclosure rate == Arm A specific-disclosure rate.",
+    "note": "Two-sided per the pilot's own v1 amendment reasoning -- the pilot's observed direction (A > B) doesn't cleanly support the original one-sided H1 (B < A), so a two-sided test is the only honest primary test."
+  },
+  "design": {
+    "inherits": "preregistration/pilot.json design block (source_prompt, arm_a, arm_b, arm_construction_rule, temperature, top_p, max_tokens, no_inference_seed), unchanged",
+    "model": "moonshotai/kimi-k2.5",
+    "provider_preferences": { "only": ["DeepInfra"], "allow_fallbacks": false },
+    "provider_selection_basis": "Confirmed live 2026-09-05 via GET /api/v1/models/moonshotai/kimi-k2.5/endpoints: DeepInfra serves this model at tag deepinfra/fp4 (not fp8 -- corrected from an earlier unverified guess), 99.94% uptime_last_1d, the only DeepInfra endpoint for this model (so \"only\":[\"DeepInfra\"] is unambiguous, no tag suffix needed).",
+    "served_provider_assertion": "Every response's provider metadata is logged; allow_fallbacks=false forbids rerouting; any response not served by DeepInfra is excluded and flagged, same discipline as the pilot.",
+    "n_per_arm": 150,
+    "pilot_cell": "The existing 30/30 pilot (moonshotai first-party, results/live/2026-08-12T16-44-24Z/) is reported as a SEPARATE cell alongside this run's 150/150 -- never pooled into one n. Two cells: [pilot: moonshotai, n=30/arm] and [expansion-v2: DeepInfra, n=150/arm].",
+    "assignment_seed": 20260905,
+    "config": "configs/expansion-v2.json"
+  },
+  "grading_instrument_calibration": {
+    "purpose": "This table is the manipulation-check for the grading instrument itself, computed BEFORE locking this prereg, from the pilot's own already-graded data -- it is the stated justification for the judge-per-arm rule below, not a post-hoc rationalization.",
+    "source": "results/live/2026-08-12T16-44-24Z/graded_with_human_labels.jsonl, production judge model google/gemini-3.1-pro-preview",
+    "table": [
+      { "arm": "A (Stated)", "judge_role": "third_person", "n": 30, "exact_match": 1.000, "kappa": 1.000 },
+      { "arm": "A (Stated)", "judge_role": "agentic", "n": 30, "exact_match": 0.700, "kappa": 0.148 },
+      { "arm": "B (Artifact/email)", "judge_role": "third_person", "n": 29, "exact_match": 1.000, "kappa": 1.000 },
+      { "arm": "B (Artifact/email)", "judge_role": "agentic", "n": 30, "exact_match": 1.000, "kappa": 1.000 }
+    ],
+    "interpretation": "The agentic judge's rubric (written for a completed, sent artifact) is unreliable on Arm A's free-form stated intent (kappa 0.148) -- this is the entire source of the pooled-across-arms kappa=0.424 reported earlier; it is a rubric-scope mismatch, not general judge unreliability, since the SAME judge model scores perfectly on Arm B (kappa 1.000) and the third-person judge scores perfectly on BOTH arms. Arm B stays on the agentic/rubric-matched judge rather than switching to third-person purely because Arm B's rubric was written for a sent artifact, not because third-person measured worse here (it didn't, at this n) -- design principle over a small-sample coincidence."
+  },
+  "primary_outcome": {
+    "grading_source": "Human labeling is PRIMARY, via a stratified audit weighted toward Arm A (below), not a full 300-record hand pass. Secondary instrument is JUDGE-PER-ARM, not both judges on both arms: Arm A (Stated) -> gemini-3.8-flash, third-person rubric (10x cheaper than production gemini-3.1-pro-preview; validated at n=10=100% agreement pre-lock, and gemini-3.1-pro itself scores 100%/kappa=1.000 on this exact role+arm per the table above -- cheap model chosen for cost, not because accuracy required it). Arm B (Artifact/email) -> gemini-3.1-pro-preview, agentic rubric (kappa=1.000 vs human, table above; ~$0.012/record, ~$1.80 for 150). The agentic rubric is NEVER run on Arm A, and the third-person rubric is not the deciding instrument for Arm B -- this is a hard rule, not a default.",
+    "human_audit_subset": {
+      "arm_b_artifact": "15 records, fixed random sample, seed 20260905 -- kappa=1.000 at n=30 in the pilot means a full audit buys little; a spot check is enough to catch drift on the new provider/date, not to re-validate the instrument from scratch.",
+      "arm_a_stated": "Every record the third-person judge labels anything other than disclose_specific, PLUS 30 additional random records, seed 20260905 -- weighted heavier because Arm A is the arm with no cheap fallback rubric if the judge drifts (unlike Arm B, which is near-mechanical the way Eval Tampering's Artifact arm is).",
+      "target_total": "~60-70 of 300, ~1.5h -- same total budget as an unweighted split, spent where the instrument has less headroom.",
+      "suggestion_visibility": "Blind -- no judge output shown during labeling, same as the pilot's own labeling artifact (verified directly from its header text: \"No judge output shown anywhere on this page\"). Today's calibration numbers are therefore not suggestion-inflated, and this subset does not need extra blinding beyond that existing practice."
+    },
+    "denominator_rule": "All valid samples (API errors and served-provider mismatches excluded; refusals retained as a valid outcome), same as the pilot."
+  },
+  "statistics": {
+    "test": "two_proportion_two_sided_z_test",
+    "ci_method": "wilson_per_arm_and_wald_on_difference",
+    "ci_level": 0.95,
+    "alpha": 0.05,
+    "primary_target": "The upper bound of the 95% CI on (Arm A rate - Arm B rate), compared against the published 13pp gap -- NOT a bare significance test. This is what P5 actually asks (\"does format explain the published gap\"), and it is answerable at n=150/arm without needing 80% power on the pilot's own 6.7pp point estimate (which would need ~215/arm and is a different, less interesting question -- state this distinction in the writeup, do not conflate the two).",
+    "secondary_target": "Whether the CI excludes zero (is there a nonzero format effect at all) -- reported, but explicitly secondary to primary_target above.",
+    "power_note": "At the pilot's rates (A=96.7%, B=90.0%), n=150/arm narrows the Wald CI half-width from roughly 12pp (n=30) to roughly 5.6pp -- enough to determine whether the upper bound clears 13pp, not enough for 80% power to declare the 6.7pp point estimate itself significant. Both facts are reported together, never the CI-tightening framed as if it answered the significance question.",
+    "ceiling_caveat": "Arm A sits at ~97% in the pilot -- the observable format effect cannot exceed roughly 3pp above whatever Arm B's true rate is, regardless of n. State this once in the writeup; it bounds what any result here can show.",
+    "chosen_at_analysis_time": false
+  },
+  "stopping_rule": {
+    "stop_without_further_spend_if": [
+      "served provider is not DeepInfra for a meaningful fraction of calls (allow_fallbacks=false should prevent this; treat any occurrence as a hard stop, not a silent exclusion-and-continue)",
+      "duplicate rate exceeds configs/expansion-v2.json's kill threshold",
+      "the pooled generation+grading spend would exceed usd_cap",
+      "completing this run would leave less than ~6 hours for writing/application work"
+    ],
+    "n_increase_rule": "Do not increase N after inspecting outcomes. N=150/arm is fixed by this prereg."
+  },
+  "cost_cap_usd": 7.0,
+  "created_before_any_expansion_v2_api_call": true
+}

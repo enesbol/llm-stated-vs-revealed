@@ -1,0 +1,45 @@
+{
+  "prereg_id": "p5-closure-amendment-v1",
+  "amendment_of": "preregistration/pilot.json (prereg_id p5-final-pilot-v2)",
+  "amendment_note": "The pilot (n=30/arm) was explicitly feasibility-only, not a test of the primary hypothesis (preregistration/pilot.json pilot_gates.scope). This file does NOT replace the pilot prereg or change the claim, primary_outcome definition, arm construction, model, or grading source — those are unchanged and are inherited verbatim. It ONLY (a) raises n_per_arm to close the primary question with a usable bound, and (b) switches the primary test from one-sided to two-sided, because the pilot's observed direction (A > B, opposite the original one-sided H1) means a one-sided test framed around 'B < A' would no longer be the honest test of the data in hand. This amendment was written and locked BEFORE any expansion-run API call, using only the pilot's already-graded, already human-labeled results (results/live/2026-08-12T16-44-24Z/). No expansion-run data of any kind existed when this file was written.",
+  "derived_from_pilot": "results/live/2026-08-12T16-44-24Z/ (human_label primary outcome: A=29/30=96.7%, B=27/30=90.0%, diff=+6.7pp, 95% Wald CI on the difference roughly [-8pp, +22.5pp] at n=30/arm)",
+  "claim": "In the released Kimi K2.5 funding-email 'What would you do?' setting, requiring the model to output the exact email it would send (instead of a free-form answer) changes the specific-disclosure rate.",
+  "primary_hypothesis": {
+    "direction": "two_sided",
+    "statement": "H1: Arm B (exact email) specific-disclosure rate != Arm A (their exact question) specific-disclosure rate.",
+    "null": "H0: Arm B specific-disclosure rate == Arm A specific-disclosure rate.",
+    "direction_change_reason": "Pilot's pre-registered direction was one-sided (H1: B < A), matching the original prediction. The pilot observed the opposite sign (A=96.7% > B=90.0%, i.e. B higher-disclosing side lower, but by less than predicted and in a direction that does not cleanly support either the original one-sided claim or its reverse). A two-sided test is the only honest primary test given this: it does not retroactively assume either direction, and it is what actually answers the P5 question ('does format explain the published gap, in either direction') rather than only one half of it."
+  },
+  "design": {
+    "inherits": "preregistration/pilot.json design block, unchanged (source_prompt, arm_a, arm_b, arm_construction_rule, model, provider_preferences, served_provider_assertion, temperature, top_p, max_tokens, no_inference_seed) except n_per_arm, assignment_seed, and replicate_offset",
+    "n_per_arm_total_target": 150,
+    "n_per_arm_pilot_already_run": 30,
+    "n_per_arm_this_expansion": 120,
+    "expansion_config": "configs/expansion.json (replicate_offset=30, assignment_seed=20260904)",
+    "power_basis": "At the pilot's observed rates (A=96.7%, B=90.0%), n=150/arm gives ~59%->~90% power gain vs n=30/arm for the pilot's own observed 6.7pp effect is NOT claimed here (that would need ~214/arm for 80% power); what n=150/arm DOES support: (a) the 95% CI on the diff tightens from roughly [-8,+22.5]pp to roughly [+1,+13]pp if rates hold, which excludes 'no meaningful effect' as cleanly as it excludes 'zero'; (b) power to detect the full published 13pp gap, if it exists in this arm-pair, is ~99%. This n was chosen to bound the size of a plausible format effect, not to guarantee significance on the pilot's specific point estimate — computed BEFORE this file was locked, from the pilot's own rates only."
+  },
+  "primary_outcome": {
+    "inherits": "preregistration/pilot.json primary_outcome block, unchanged: frozen human rubric is primary; both released judges run as secondary instruments on every output in both arms."
+  },
+  "statistics": {
+    "test": "two_proportion_two_sided_z_test",
+    "ci_method": "wilson_per_arm_and_wald_on_difference",
+    "ci_level": 0.95,
+    "alpha": 0.05,
+    "equivalence_margin_pp": null,
+    "equivalence_margin_note": "Not set. The pilot's own equivalence_margin_pp was also null (never instantiated). This amendment does not introduce one post-hoc; the primary read is the two-sided CI on the difference, reported directly, not an equivalence classification chosen after seeing wider data.",
+    "chosen_at_analysis_time": false
+  },
+  "interpretation_table": {
+    "ci_excludes_zero_and_lower_bound_above_5pp": "A real, non-trivial format effect is supported; report its size and compare to the published 13pp gap.",
+    "ci_excludes_zero_but_upper_bound_well_below_13pp": "A format effect exists but format alone does not explain the full published asking-vs-doing gap; residual explanation lies in role/history/interaction, matching the pilot prereg's rival_hypothesis H-pos.",
+    "ci_includes_zero": "No statistically significant format effect detected at n=150/arm (two-sided, alpha=0.05). Report the CI bounds explicitly alongside this -- 'not significant' is not equivalent to 'no effect' at this power; state what effect sizes the CI does and does not exclude.",
+    "ci_includes_13pp": "The original published gap's magnitude cannot be excluded by this test; do not claim format 'cannot explain' the gap if 13pp remains inside the CI."
+  },
+  "secondary_findings_carried_from_pilot": {
+    "refusal_rate_drift": "Arm A refusal rate: 1/30=3.3% (this pilot+expansion sample) vs 33/200=16.5% (paper's original released batches). Full 33/33 census of the paper's own refused samples (docs/handoff/notes.md, 2026-09-04) found this is not attributable to judge miscalibration on our side. Reported as a secondary reproducibility finding per pilot prereg's anchor.replication_target clause -- NOT the primary test, and not re-framed as one in this amendment.",
+    "judge_reasoning_blindness": "Judges reading only response_content (not response_reasoning) manufactured a spurious reversal in early secondary-instrument numbers (agentic judge: B=89% > A=69%) that the frozen human rubric did not reproduce (A=96.7% > B=90.0%). Fixed and regraded; reported as a methodology finding about instrument validity, per pilot prereg rule 9 (judge-human agreement reported per arm per judge, never presented as if it were the primary outcome)."
+  },
+  "locked_before_expansion_run": true,
+  "created_before_any_expansion_api_call": true
+}
